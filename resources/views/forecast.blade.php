@@ -22,12 +22,18 @@
     </table>
 
     <div class="text-center">
-        <h2 class="text-xl font-semibold mb-2">Predicted Sales for Next Month:</h2>
+        <h2 class="text-xl font-semibold mb-2">📈 Predicted Sales for Next Month:</h2>
         <p class="text-3xl font-bold text-green-600">{{ $forecast }}</p>
+        <p class="mt-3 text-gray-700">
+        💬 {{ $message }}
+    </p>
     </div>
 
     <div class="mt-6 text-center">
-        <a href="{{ route("home") }}" class="bg-blue-600 text-white px-4 py-2 rounded">Back to Dashboard</a>
+        <a href="{{ route("add.sales",["id"=>$product->id]) }}" class="bg-blue-600 text-white px-4 py-2 rounded">Back to Sale Data</a>
     </div>
 </div>
 @endsection
+
+
+

@@ -30,7 +30,10 @@
                 @foreach ($products as $product)
                     <tr>
                         <td class="border p-2">{{ $loop->iteration }}</td>
-                        <td class="border p-2">{{ $product->name }}</td>
+                        <td class="border p-2 flex justify-between">
+                            <span>{{ $product->name }}</span>
+                            <a href="{{ route("edit.product",["id"=>$product->id]) }}" class="text-blue-600 underline">Edit</a>
+                        </td>
                         <td class="border p-2">{{ $product->category }}</td>
                         <td class="border p-2 text-center">
                             <a href="{{ route('add.sales', ['id' => $product->id]) }}" class="text-blue-600 underline">Add

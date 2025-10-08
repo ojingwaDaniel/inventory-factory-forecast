@@ -14,7 +14,7 @@ class ForecastController extends Controller
     public function index()
     {
         //
-        $products = Product::latest()->get();
+        $products = Product::orderBy("category")->orderBy("created_at","desc")->get();
         return view("home", compact("products"));
     }
 
@@ -38,19 +38,19 @@ class ForecastController extends Controller
             "category" => "nullable|string"
         ]);
         Product::create([
-            "name"=> $request->name,
-            "category"=> $request->category
+            "name" => $request->name,
+            "category" => $request->category
         ]);
-        return redirect()->route("home")->with("success","Sucessfully added a product");
-
+        return redirect()->route("home")->with("success", "Sucessfully added a product");
     }
-    public function addSales($id){
+    public function addSales($id)
+    {
         $product = Product::findOrFail($id);
         $sales = SalesData::where("product_id", $id)->get();
         return view("add-sales", compact("product", "sales"));
-
     }
-    public function storeSales( Request $request,$id){
+    public function storeSales(Request $request, $id)
+    {
         $request->validate([
             "month" => "required",
             "units_sold" => "required|integer|min:1"
@@ -60,23 +60,33 @@ class ForecastController extends Controller
             "month" => $request->month,
             "units_sold" => $request->units_sold
         ]);
-        return back()->with("sucess", "Sucessfully added a Sale record");
+        return back()->with("success", "Sucessfully added a Sale record");
     }
-    public function forecast($product_id){
+    public function forecast($product_id)
+    {
         $product = Product::findOrFail($product_id);
-        $sales = SalesData::where("product_id", $product_id)->orderBy("month", "asc")->get();
-        if($sales->count() < 3){
+        $sales = SalesData::where("product_id", $product_id)->orderBy("created_at", "desc")->take(3)->get()->sortBy("created_at")->values();
+        if ($sales->count() < 3) {
             return back()->with("error", "You must have at least three months of data to forecast");
         }
-        $lastThree = $sales->take(-3);
-        $forecast = round($lastThree->avg("units_sold"), 2);
-        return view("forecast", compact("product", "sales", "forecast"));
+        $salesAmount = $sales->pluck("units_sold")->values();
+        [$month1, $month2, $month3] = $salesAmount;
+        $avg = ($month1 + $month2 + $month3) / 3;
+        $trend = ($month3 - $month1) / 2;
+        $forecast = round(($avg + $trend), 2);
+        $message = match (true) {
+            $trend > 0 => "Sales are increasing. Keep up the good work!",
+            $trend < 0 => "Sales are dropping. You may need to improve marketing or reduce costs.",
+            default => "Sales are stable. Maintain your strategy and watch for changes."
+        };
+        return view("forecast", compact("product", "sales", "forecast", "message"));
     }
 
 
     public function edit(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+        return view("edit-product", compact("product"));
     }
 
     /**
@@ -84,7 +94,15 @@ class ForecastController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            "name" => "required",
+            "category" => "nullable"
+        ]);
+        Product::where("id", $id)->update([
+            "name" => $request->name,
+            "category" => $request->category
+        ]);
+        return redirect()->route("home")->with("success", "Sucessfully updated the product");
     }
 
     /**
