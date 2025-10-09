@@ -28,6 +28,41 @@
         💬 {{ $message }}
     </p>
     </div>
+    <div class="bg-gray-50 p-4 rounded shadow mb-6">
+        <h2 class="text-lg font-semibold mb-3 text-center">Sales Trend Chart</h2>
+        <canvas id="salesChart"></canvas>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('salesChart');
+    const salesMonths = {!! json_encode($sales->pluck('month')) !!};
+    const salesUnits = {!! json_encode($sales->pluck('units_sold')) !!};
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [...salesMonths, 'Next Month'],
+            datasets: [{
+                label: 'Units Sold',
+                data: [...salesUnits, {{ $forecast }}],
+                borderColor: 'rgb(37, 99, 235)',  // blue
+                backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
 
     <div class="mt-6 text-center">
         <a href="{{ route("add.sales",["id"=>$product->id]) }}" class="bg-blue-600 text-white px-4 py-2 rounded">Back to Sale Data</a>

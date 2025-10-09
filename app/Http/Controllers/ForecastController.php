@@ -2,37 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\SalesData;
 use Illuminate\Http\Request;
 
 class ForecastController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
-        $products = Product::orderBy("category")->orderBy("created_at","desc")->get();
+       
+        $products = Product::orderBy("category")->orderBy("created_at", "desc")->get();
         return view("home", compact("products"));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function createProduct()
     {
-        //
-        return view("add-product");
+        
+        $categories = Category::all();
+        return view("add-product", compact("categories"));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function editProduct(string $id)
     {
-        //
+        $product = Product::findOrFail($id);
+        return view("edit-product", compact("product"));
+    }
+    public function storeProduct(Request $request)
+    {
         $request->validate([
             "name" => "required",
             "category" => "nullable|string"
@@ -62,6 +57,29 @@ class ForecastController extends Controller
         ]);
         return back()->with("success", "Sucessfully added a Sale record");
     }
+    public function editSales($id){
+        $saleData = SalesData::findOrFail($id);
+        $product = Product::findOrFail($saleData->product_id);
+        return view("edit-sales", compact("saleData","product"));
+
+    }
+    public function updateSales(Request $request, $id){
+        $request->validate([
+            "month" => "required",
+            "units_sold" => "required|integer|min:1"
+        ]);
+        $sales = SalesData::findOrFail($id);
+        $sales->update([
+            "month" => $request->month,
+            "units_sold"=> $request->units_sold
+        ]);
+        return redirect()->route("add.sales",$sales->product_id)->with("success", "Updated the sales Data sucessfully");
+    }
+    public function deleteSales($id){
+        $sale = SalesData::findOrFail($id);
+        $sale->delete();
+        return redirect()->route("add.sales", $sale->product_id)->with("success", "Deleted the sale data successfully!");
+    }
     public function forecast($product_id)
     {
         $product = Product::findOrFail($product_id);
@@ -82,17 +100,7 @@ class ForecastController extends Controller
         return view("forecast", compact("product", "sales", "forecast", "message"));
     }
 
-
-    public function edit(string $id)
-    {
-        $product = Product::findOrFail($id);
-        return view("edit-product", compact("product"));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function updateProduct(Request $request, string $id)
     {
         $request->validate([
             "name" => "required",
@@ -105,11 +113,12 @@ class ForecastController extends Controller
         return redirect()->route("home")->with("success", "Sucessfully updated the product");
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroyProduct(string $id)
     {
-        //
+     
+        $product = Product::findOrFail($id);
+        $product->delete();
+        return redirect()->route("home")->with("success", "Deleted the product successfully!");
     }
+
 }

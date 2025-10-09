@@ -12,5 +12,10 @@
         <h1 class="text-2xl font-bold mb-4 text-center">Inventory Demand Forecast System</h1>
         @yield('content')
     </div>
+    <script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    lucide.createIcons();
+</script>
+
 </body>
 </html>
