@@ -15,7 +15,7 @@
             <label class="mb-1 block font-medium">Product Name</label>
             <input type="text" name="name" class="w-full rounded border p-2" placeholder="e.g. Rice"
                 value="{{ isset($product) ? $product->name : old('name') }}" required minlength="2" maxlength="50"
-                pattern="[A-Za-z\s]+" title="Product name should contain only letters and spaces.">
+                title="Product name should contain only letters and spaces.">
             @error('name')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror

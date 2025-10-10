@@ -92,12 +92,8 @@ class ForecastController extends Controller
         $avg = ($month1 + $month2 + $month3) / 3;
         $trend = ($month3 - $month1) / 2;
         $forecast = round(($avg + $trend), 2);
-        $message = match (true) {
-            $trend > 0 => "Sales are increasing. Keep up the good work!",
-            $trend < 0 => "Sales are dropping. You may need to improve marketing or reduce costs.",
-            default => "Sales are stable. Maintain your strategy and watch for changes."
-        };
-        return view("forecast", compact("product", "sales", "forecast", "message"));
+        
+        return view("forecast", compact("product", "sales", "forecast", "trend"));
     }
 
     public function updateProduct(Request $request, string $id)
